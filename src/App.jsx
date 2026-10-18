@@ -1,0 +1,83 @@
+import { useMemo, useState, useEffect } from "react";
+import { ArrowDownRight, ArrowRight, ArrowLeft, BookOpen, Bookmark, Check, ChevronDown, Compass, Menu, Search, Sparkles, X, Clock3, LibraryBig, Maximize2 } from "lucide-react";
+
+const genres = ["All stories", "Fantasy", "Romance", "Mystery", "Thriller", "Literary fiction", "Sci-fi"];
+const books = [
+ {id:"moonlit",title:"The Moonlit Archive",author:"Elena Wren",genre:"Fantasy",note:"A forgotten library. A map that changes every night.",pages:284,cover:"https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=900&q=85",tag:"EDITOR'S PICK"},
+ {id:"quiet",title:"A Quiet Kind of Fire",author:"Mira Ellery",genre:"Literary fiction",note:"Some lives change in the moments no one notices.",pages:216,cover:"https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=900&q=85",tag:"NEW THIS WEEK"},
+ {id:"glass",title:"The Glass Orchard",author:"Theo Marlow",genre:"Mystery",note:"Every family keeps a secret. This one grew roots.",pages:302,cover:"https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=900&q=85",tag:"READER FAVOURITE"},
+ {id:"elsewhere",title:"Letters from Elsewhere",author:"June Avery",genre:"Romance",note:"A stack of letters. A city full of almosts.",pages:198,cover:"https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=900&q=85",tag:""},
+ {id:"night",title:"After the Last Light",author:"R. C. Vale",genre:"Thriller",note:"The truth is closer than the dark wants you to think.",pages:265,cover:"https://images.unsplash.com/photo-1513001900722-370f803f498d?auto=format&fit=crop&w=900&q=85",tag:""},
+ {id:"orbit",title:"An Orbit of Small Things",author:"Nadia Sol",genre:"Sci-fi",note:"A tender story set at the edge of everything.",pages:241,cover:"https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=900&q=85",tag:""}
+];
+function readStorage(key,fallback){try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback));}catch{return fallback;}}
+
+export default function App(){
+ const [activeGenre,setActiveGenre]=useState("All stories");
+ const [search,setSearch]=useState("");
+ const [saved,setSaved]=useState(()=>readStorage("flipsite-saved",[]));
+ const [progress,setProgress]=useState(()=>readStorage("flipsite-progress",{}));
+ const [showSaved,setShowSaved]=useState(false);
+ const [mobileOpen,setMobileOpen]=useState(false);
+ const [selectedBook,setSelectedBook]=useState(null);
+ const [readerPage,setReaderPage]=useState(1);
+const [readerFullscreen,setReaderFullscreen]=useState(false);
+ const filteredBooks=useMemo(()=>books.filter(book=>{
+  const matchesGenre=activeGenre==="All stories"||book.genre===activeGenre;
+  const q=search.trim().toLowerCase();
+  const matchesSearch=!q||`${book.title} ${book.author} ${book.genre}`.toLowerCase().includes(q);
+  return matchesGenre&&matchesSearch&&(!showSaved||saved.includes(book.id));
+ }),[activeGenre,search,showSaved,saved]);
+ function toggleSaved(id){const next=saved.includes(id)?saved.filter(item=>item!==id):[...saved,id];setSaved(next);localStorage.setItem("flipsite-saved",JSON.stringify(next));}
+ function startReading(book){const page=progress[book.id]||1;setReaderPage(page);setReaderFullscreen(false);setSelectedBook(book);}
+ function changeReaderPage(page){
+  if(!selectedBook)return;
+  const total=12;
+  const nextPage=Math.max(1,Math.min(total,page));
+  setReaderPage(nextPage);
+  const next={...progress,[selectedBook.id]:nextPage};
+  setProgress(next);localStorage.setItem("flipsite-progress",JSON.stringify(next));
+ }
+ const samplePages=[
+  {heading:"A beginning, not an ending",text:"Every story starts somewhere. Sometimes it begins with a knock at the door; sometimes with a letter that should never have arrived. And sometimes, as it did here, it begins with the quiet feeling that the world has changed while nobody was looking."},
+  {heading:"The shape of a memory",text:"She had always believed memories were kept like books on a shelf: neatly arranged, easy to reach, and safe from the weather. Only later did she learn that memory was more like a garden. Things grew where they pleased, and the oldest roots were often the hardest to find."},
+  {heading:"A door left open",text:"At the end of the corridor, a narrow door stood ajar. A line of warm light crossed the floorboards. She paused, listening—not for a sound, but for the absence of one. The house seemed to be holding its breath."},
+  {heading:"What the night remembers",text:"Outside, the trees shifted in the wind and brushed their branches against the glass. The moon made silver patterns on the desk. Somewhere beyond the garden wall, a train passed, carrying strangers towards places she had never seen."},
+  {heading:"A map of small things",text:"There were clues everywhere once she knew how to look: a folded corner, a name crossed out twice, a pressed flower tucked between two pages. Nothing was important on its own. Together, they began to tell a story."},
+  {heading:"The quiet between words",text:"They spoke for a long time about ordinary things. The weather. The road into town. The smell of rain on stone. Neither mentioned the question that had brought them there, but it sat between them, patient as a third person."},
+  {heading:"The first turning",text:"When morning came, the choice was still waiting. She could close the book and return to the life she understood, or turn the page and accept that certainty had never been the same as safety."},
+  {heading:"A light in the distance",text:"Far across the valley, a single light appeared in a window. It was too distant to reveal a face, but it was enough to make the dark feel less absolute. She set out before she could change her mind."},
+  {heading:"The things we carry",text:"She packed lightly: a coat, a notebook, the letter, and one photograph whose edges had gone soft. The rest, she decided, could be remembered without being carried."},
+  {heading:"An unexpected answer",text:"The answer did not arrive as a revelation. It came in a dozen ordinary moments, each one adding a little weight to the truth until it could no longer be ignored."},
+  {heading:"The world beyond",text:"By the time the road curved towards the sea, the old landmarks had disappeared behind her. The horizon opened wide. For the first time in years, the future looked less like a corridor and more like a landscape."},
+  {heading:"Turn the page",text:"And so the story continued—not because every mystery had been solved, but because there were still pages left to read. There always were. The only question was whether she would be brave enough to turn them."}
+ ];
+ return <div className="site-shell">
+  <div className="announcement"><span className="announcement-dot"/> YOUR NEXT FAVOURITE STORY IS WAITING <span className="announcement-separator">—</span><span>Explore the library</span><ArrowRight size={13}/></div>
+  <header className="site-header">
+   <a className="brand" href="#" aria-label="FlipSite home"><span className="brand-mark"><BookOpen size={20} strokeWidth={1.8}/></span><span className="brand-word">flip<span>site</span><i>.</i></span></a>
+   <nav className={`main-nav ${mobileOpen?"nav-open":""}`}><a className="nav-link active" href="#discover" onClick={()=>setMobileOpen(false)}>Discover</a><a className="nav-link" href="#library" onClick={()=>setMobileOpen(false)}>The library</a><a className="nav-link" href="#genres" onClick={()=>setMobileOpen(false)}>Genres <ChevronDown size={13}/></a><a className="nav-link" href="#about" onClick={()=>setMobileOpen(false)}>Our story</a></nav>
+   <div className="header-actions"><button className={`icon-button ${showSaved?"is-active":""}`} aria-label="Show saved books" onClick={()=>{setShowSaved(!showSaved);document.getElementById("library")?.scrollIntoView({behavior:"smooth"});}}><Bookmark size={17}/>{saved.length>0&&<span className="saved-count">{saved.length}</span>}</button><a className="header-cta" href="#library">Start exploring <ArrowRight size={15}/></a><button className="mobile-menu icon-button" aria-label="Toggle navigation" onClick={()=>setMobileOpen(!mobileOpen)}>{mobileOpen?<X size={20}/>:<Menu size={20}/>}</button></div>
+  </header>
+  <main>
+   <section className="hero" id="discover">
+    <div className="hero-copy"><div className="eyebrow"><span className="eyebrow-line"/> A LIBRARY WITHOUT WALLS</div><h1>Stories worth<br/>getting <em>lost in.</em></h1><p className="hero-description">A little escape, a new perspective, a world you haven't met yet. Find your next read in a library made for the love of stories.</p><div className="hero-buttons"><a className="button-primary" href="#library">Explore the library <ArrowRight size={16}/></a><a className="button-text" href="#genres"><span className="round-arrow"><ArrowDownRight size={16}/></span> Find your genre</a></div><div className="hero-proof"><div className="avatar-stack" aria-hidden="true"><span>J</span><span>M</span><span>A</span><span>+</span></div><div><strong>A quieter corner of the internet.</strong><small>Made for curious minds and late-night readers.</small></div></div></div>
+    <div className="hero-art" aria-label="Featured book covers"><div className="art-backdrop"/><div className="art-note note-top"><Sparkles size={13}/> A WORLD BETWEEN PAGES</div><div className="hero-book book-back"><img src={books[2].cover} alt="The Glass Orchard cover artwork"/><div className="book-overlay"><span>THE</span><strong>GLASS<br/>ORCHARD</strong><small>A NOVEL</small></div></div><div className="hero-book book-front"><img src={books[0].cover} alt="The Moonlit Archive cover artwork"/><div className="book-overlay"><span>THE</span><strong>MOONLIT<br/>ARCHIVE</strong><small>ELENA WREN</small></div></div><div className="art-note note-bottom"><span className="note-star">✳</span><span>TURN A PAGE.<br/><b>GO SOMEWHERE.</b></span></div><div className="art-caption">VOL. 01 <span>·</span> THE ART OF GETTING LOST</div></div>
+   </section>
+   <section className="genre-strip" id="genres"><div className="strip-label"><Compass size={15}/> FIND YOUR NEXT WORLD</div><div className="genre-list">{genres.slice(1).map(genre=><button key={genre} onClick={()=>{setActiveGenre(genre);document.getElementById("library")?.scrollIntoView({behavior:"smooth"});}}>{genre}<ArrowDownRight size={13}/></button>)}</div></section>
+   <section className="library-section" id="library"><div className="section-heading"><div><div className="eyebrow"><span className="eyebrow-line"/> THE READING ROOM</div><h2>{showSaved?"Your saved stories.":"A shelf worth staying for."}</h2><p>Thoughtfully gathered reads for wherever your mind wants to wander.</p></div><div className="library-tools"><label className="search-box"><Search size={17}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Title, author, genre..." aria-label="Search books"/>{search&&<button onClick={()=>setSearch("")} aria-label="Clear search"><X size={15}/></button>}</label></div></div>
+    <div className="filter-row"><div className="filter-pills">{genres.map(genre=><button key={genre} className={activeGenre===genre?"selected":""} onClick={()=>setActiveGenre(genre)}>{genre}</button>)}</div><button className={`saved-filter ${showSaved?"selected":""}`} onClick={()=>setShowSaved(!showSaved)}><Bookmark size={14}/> Saved <span>{saved.length}</span></button></div>
+    {filteredBooks.length?<div className="book-grid">{filteredBooks.map((book,index)=>{const isSaved=saved.includes(book.id);return <article className="book-card" key={book.id} style={{"--card-index":index}}><div className="book-cover-wrap" onClick={()=>startReading(book)} role="button" tabIndex={0} onKeyDown={e=>e.key==="Enter"&&startReading(book)} aria-label={`Open ${book.title}`}><img className="book-cover" src={book.cover} alt={`Cover artwork for ${book.title}`} loading="lazy"/><div className="cover-shade"/>{book.tag&&<span className="book-tag">{book.tag}</span>}<button className={`save-button ${isSaved?"saved":""}`} onClick={e=>{e.stopPropagation();toggleSaved(book.id);}} aria-label={isSaved?"Remove from saved":"Save book"}>{isSaved?<Check size={16}/>:<Bookmark size={16}/>}</button><span className="cover-read">Read story <ArrowRight size={14}/></span></div><div className="book-meta"><span className="book-genre">{book.genre}</span><span className="book-pages">{book.pages} pages</span></div><h3>{book.title}</h3><p className="book-author">by {book.author}</p><p className="book-note">{book.note}</p></article>;})}</div>:<div className="empty-state"><LibraryBig size={28}/><h3>No stories found</h3><p>Try a different search or genre, or save a few books to build your shelf.</p><button className="button-primary" onClick={()=>{setSearch("");setActiveGenre("All stories");setShowSaved(false);}}>Show all stories <ArrowRight size={15}/></button></div>}
+    <div className="library-bottom"><span>SHOWING {filteredBooks.length} OF {books.length} STORIES</span><span className="bottom-rule"/><span>MORE WORLDS ARE ON THEIR WAY <Sparkles size={13}/></span></div>
+   </section>
+   <section className="quote-section" id="about"><span className="quote-mark">“</span><p>There is no friend as loyal as a book.</p><span className="quote-credit">— ERNEST HEMINGWAY</span><div className="quote-flourish">✳</div></section>
+  </main>
+  <footer className="site-footer"><div className="footer-main"><a className="brand" href="#"><span className="brand-mark"><BookOpen size={20}/></span><span className="brand-word">flip<span>site</span><i>.</i></span></a><p>A small escape, one page at a time.</p><div className="footer-links"><a href="#about">About</a><a href="mailto:hello@flipsite.example">Contact</a><a href="#privacy">Privacy</a><a href="#copyright">Copyright</a></div></div><div className="footer-bottom"><span>© 2026 FLIPSITE. MADE FOR THE LOVE OF STORIES.</span><span>READ A LITTLE. DREAM A LOT.</span></div></footer>
+  {selectedBook&&<div className="reader-backdrop" role="presentation" onClick={()=>setSelectedBook(null)}><section className={`reader-shell ${readerFullscreen?"reader-fullscreen":""}`} role="dialog" aria-modal="true" aria-label={`Read ${selectedBook.title}`} onClick={e=>e.stopPropagation()}>
+   <header className="reader-topbar"><div className="reader-brand"><BookOpen size={18}/><span>flipsite<span className="reader-brand-dot">.</span></span></div><div className="reader-book-title"><strong>{selectedBook.title}</strong><span>by {selectedBook.author}</span></div><div className="reader-top-actions"><button onClick={()=>setReaderFullscreen(!readerFullscreen)} aria-label="Toggle reader size"><Maximize2 size={17}/></button><button onClick={()=>setSelectedBook(null)} aria-label="Close reader"><X size={20}/></button></div></header>
+   <div className="reader-main"><aside className="reader-side-note"><span className="reader-kicker">NOW READING</span><h2>{selectedBook.title}</h2><p>{selectedBook.note}</p><div className="reader-progress-label"><span>YOUR PROGRESS</span><b>{Math.round(readerPage/12*100)}%</b></div><div className="reader-progress-track"><span style={{width:`${readerPage/12*100}%`}}/></div><small>Progress saves automatically on this device.</small></aside>
+    <div className="book-stage"><div className="paper-book" key={`${selectedBook.id}-${readerPage}`}><div className="paper-topline"><span>FLIPSITE EDITIONS</span><span>{String(readerPage).padStart(2,"0")}</span></div>{readerPage===1?<div className="paper-cover-page"><span className="paper-cover-label">A FLIPSITE READING SAMPLE</span><div className="paper-cover-rule"/><h1>{selectedBook.title}</h1><p>{selectedBook.note}</p><span className="paper-author">{selectedBook.author.toUpperCase()}</span></div>:<div className="paper-text-page"><span className="paper-chapter">CHAPTER {Math.min(readerPage-1,11)}</span><h2>{samplePages[readerPage-1].heading}</h2><p className="dropcap">{samplePages[readerPage-1].text}</p><p>{samplePages[(readerPage)%samplePages.length].text}</p><p>{samplePages[(readerPage+3)%samplePages.length].text}</p></div>}<div className="paper-footer"><span>{selectedBook.title.toUpperCase()}</span><span>{readerPage}</span></div></div><div className="reader-controls"><button onClick={()=>changeReaderPage(readerPage-1)} disabled={readerPage===1}><ArrowLeft size={16}/> Previous</button><span>PAGE <b>{readerPage}</b> OF 12</span><button onClick={()=>changeReaderPage(readerPage+1)} disabled={readerPage===12}>Next page <ArrowRight size={16}/></button></div><p className="reader-demo-note">Interactive demo · Sample text only, not the full publication</p></div>
+   </div>
+  </section></div>}
+ </div>;
+}
