@@ -6,3 +6,4 @@ dist/
 !.env.example
 .vite/
 .DS_Store
+public/books/Autobiography of Yogi.pdf

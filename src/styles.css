@@ -1212,7 +1212,7 @@ button { color: inherit; }
 
 .reader-main {
   display: grid;
-  grid-template-columns: 245px 1fr;
+  grid-template-columns: minmax(0, 1fr);
   flex: 1;
   min-height: 0;
 }
@@ -1509,3 +1509,141 @@ button { color: inherit; }
   .reader-controls > span { font-size: 8px; }
   .reader-book-title strong { font-size: 13px; }
 }
+.reader-top-actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.reader-top-actions .reader-zoom-level {
+  width: auto;
+  min-width: 48px;
+  padding: 0 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.book-stage {
+  overflow: auto;
+}
+
+.paper-book {
+  flex-shrink: 0;
+}
+
+.pdf-book-stage {
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.pdf-reader-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  flex: 1;
+  border: 0;
+  background: #fff;
+}
+
+
+/* PDF-powered page-flip reader */
+.pdf-book-stage {
+  align-items: center;
+  justify-content: flex-start;
+  overflow: auto;
+  padding: 24px 18px 16px;
+  gap: 14px;
+}
+.pdf-document { width: 100%; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+.pdf-document > .react-pdf__Document { width: 100%; }
+.flip-book { max-width: 100%; margin-inline: auto; }
+.pdf-flip-page { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; overflow: hidden; background: #fffdf8; box-shadow: inset 0 0 12px rgba(40, 35, 25, .07); }
+.pdf-flip-page .react-pdf__Page { max-width: 100%; }
+.pdf-flip-page canvas { display: block; max-width: 100%; height: auto !important; }
+.pdf-flip-page .react-pdf__Page__textContent, .pdf-flip-page .react-pdf__Page__annotations { max-width: 100%; }
+.pdf-page-number { position: absolute; bottom: 7px; right: 12px; padding: 2px 5px; color: #777f77; background: rgba(255,253,248,.8); font-size: 10px; }
+.pdf-reader-status, .pdf-reader-error { padding: 28px; text-align: center; color: #536457; font-size: 13px; }
+.pdf-reader-error { background: #fffdf8; border: 1px solid #e2ded3; max-width: 520px; margin: 20px auto; }
+.pdf-reader-error h3 { font-family: Georgia, serif; font-weight: 500; }
+.pdf-page-loading { padding: 20px; font-size: 12px; color: #777f77; }
+.sample-reader-wrap { display: flex; justify-content: center; align-items: center; width: 100%; min-height: 0; flex: 1; }
+.pdf-book-stage .reader-controls { flex-shrink: 0; }
+@media (min-width: 701px) {
+  /* Landscape mode: show two pages together as an open book. */
+  .reader-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pdf-book-stage {
+    align-items: center;
+    overflow: auto;
+    padding: 18px 12px 16px;
+  }
+
+  .pdf-book-stage .flip-book {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  /* Portrait mode: one page at a time on phones. */
+  .pdf-book-stage {
+    width: 100%;
+    min-width: 0;
+    padding: 12px 8px;
+    gap: 12px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .pdf-document,
+  .pdf-document > .react-pdf__Document,
+  .pdf-book-stage .flip-book {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .pdf-flip-page {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .pdf-flip-page .react-pdf__Page,
+  .pdf-flip-page canvas {
+    max-width: 100%;
+  }
+
+  .pdf-page-number {
+    font-size: 9px;
+    bottom: 5px;
+    right: 7px;
+  }
+
+  .pdf-book-stage .reader-controls {
+    width: 100%;
+    gap: 8px;
+    justify-content: space-between;
+  }
+
+  .pdf-book-stage .reader-controls button {
+    min-height: 40px;
+    padding: 9px 12px;
+    white-space: nowrap;
+  }
+
+  .pdf-book-stage .reader-controls > span {
+    white-space: nowrap;
+  }
+
+  .pdf-book-stage .reader-demo-note {
+    max-width: 100%;
+    text-align: center;
+  }
+}
+
+.pdf-page-placeholder { width: 100%; height: 100%; background: #fffdf8; }
